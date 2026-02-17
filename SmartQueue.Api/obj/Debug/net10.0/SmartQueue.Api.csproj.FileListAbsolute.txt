@@ -1,13 +1,6 @@
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.csproj.AssemblyReference.cache
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\rpswa.dswa.cache.json
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.AssemblyInfoInputs.cache
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.AssemblyInfo.cs
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.csproj.CoreCompileInputs.cache
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\appsettings.Development.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\appsettings.json
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\SmartQueue.Api.staticwebassets.runtime.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\SmartQueue.Api.staticwebassets.endpoints.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\SmartQueue.Api.exe
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\SmartQueue.Api.deps.json
@@ -172,6 +165,15 @@ C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\runtimes\win-ar
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\runtimes\win-arm64\native\e_sqlite3.dll
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\runtimes\win-x64\native\e_sqlite3.dll
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\runtimes\win-x86\native\e_sqlite3.dll
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.csproj.AssemblyReference.cache
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.AssemblyInfoInputs.cache
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.AssemblyInfo.cs
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.csproj.CoreCompileInputs.cache
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.sourcelink.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -187,5 +189,4 @@ C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\refint\SmartQue
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.pdb
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.genruntimeconfig.cache
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\ref\SmartQueue.Api.dll
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\bin\Debug\net10.0\SmartQueue.Api.staticwebassets.runtime.json
-C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\compressed\pdv06anld0-{0}-l09qzd6wju-l09qzd6wju.gz
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\compressed\pdv06anld0-{0}-0o8dwwdacp-0o8dwwdacp.gz

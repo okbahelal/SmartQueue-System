@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SmartQueue.Api.Data;
+using SmartQueue.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<QueueDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ITicketService, TicketService>();
+
 
 var app = builder.Build();
 

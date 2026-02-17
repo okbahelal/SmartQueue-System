@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SmartQueue.Api.Data;
+using SmartQueue.Api.Services;
 using SmartQueue.Api.Models;
-using System.Linq;
 
 namespace SmartQueue.Api.Controllers;
 
@@ -10,52 +8,76 @@ namespace SmartQueue.Api.Controllers;
 [Route("api/[controller]")]
 public class TicketsController : ControllerBase
 {
-    private readonly QueueDbContext _db;
+    private readonly ITicketService _service;
 
-    public TicketsController(QueueDbContext db)
+    public TicketsController(ITicketService service)
     {
-        _db = db;
+        _service = service;
     }
 
-   [HttpPost]
-public async Task<ActionResult<Ticket>> Create([FromQuery] string serviceName)
-{
-    string code = serviceName switch
+    // POST /api/Tickets?serviceName=...
+    [HttpPost]
+    public IActionResult CreateTicket([FromQuery] string serviceName)
     {
-        "إيداع" => "D",
-        "سحب" => "W",
-        "فتح حساب" => "A",
-        "استفسار" => "Q",
-        _ => "G"
-    };
+        if (string.IsNullOrWhiteSpace(serviceName))
+            return BadRequest("serviceName is required.");
 
-    int lastSeq = await _db.Tickets
-        .Where(t => t.ServiceCode == code)
-        .OrderByDescending(t => t.SequenceNumber)
-        .Select(t => t.SequenceNumber)
-        .FirstOrDefaultAsync();
+        var result = _service.CreateTicket(serviceName);
+        return Ok(result);
+    }
 
-    int nextSeq = lastSeq + 1;
-
-    var ticket = new Ticket
-    {
-        ServiceName = serviceName,
-        ServiceCode = code,
-        SequenceNumber = nextSeq,
-        DisplayNumber = $"{code}-{nextSeq:000}"
-    };
-
-    _db.Tickets.Add(ticket);
-    await _db.SaveChangesAsync();
-
-    return Ok(ticket);
-}
-
-
+    // GET /api/Tickets?page=1&pageSize=10&serviceName=...&isServed=false
     [HttpGet]
-    public async Task<ActionResult<List<Ticket>>> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? serviceName = null,
+        [FromQuery] bool? isServed = null)
     {
-        var list = await _db.Tickets.AsNoTracking().OrderByDescending(x => x.Id).ToListAsync();
-        return Ok(list);
+        var result = await _service.GetAllAsync(page, pageSize, serviceName, isServed);
+        return Ok(result);
     }
+
+    // GET /api/Tickets/status?serviceName=...
+    [HttpGet("status")]
+    public IActionResult GetServiceStatus([FromQuery] string serviceName)
+    {
+        if (string.IsNullOrWhiteSpace(serviceName))
+            return BadRequest("serviceName is required.");
+
+        var result = _service.GetServiceStatus(serviceName);
+        return Ok(result);
+    }
+
+    // POST /api/Tickets/{id}/serve
+    [HttpPost("{id}/serve")]
+    public IActionResult ServeTicket(int id)
+    {
+        var ok = _service.ServeTicket(id);
+        if (!ok) return NotFound();
+
+        return Ok(new { message = "Ticket served successfully" });
+    }
+    // POST /api/Tickets/serve-next?serviceName=...
+[HttpPost("serve-next")]
+public IActionResult ServeNext([FromQuery] string serviceName)
+{
+    if (string.IsNullOrWhiteSpace(serviceName))
+        return BadRequest("serviceName is required.");
+
+    var result = _service.ServeNext(serviceName);
+    if (result == null) return NotFound(new { message = "No waiting tickets for this service." });
+
+    return Ok(new
+    {
+        message = "Next ticket served successfully",
+        servedTicketId = result.Id,
+        serviceName = result.ServiceName
+    });
 }
+
+}
+
+
+
+

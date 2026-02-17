@@ -1,17 +1,16 @@
-using System.ComponentModel.DataAnnotations;
+using System;
 
-namespace SmartQueue.Api.Models;
-
-public class Ticket
+namespace SmartQueue.Api.Models
 {
-    public int Id { get; set; }
-    public string ServiceName { get; set; } = string.Empty;
+    public class Ticket
+    {
+        public int Id { get; set; }
 
-    public string ServiceCode { get; set; } = "G";
-    public int SequenceNumber { get; set; }
-    public string DisplayNumber { get; set; } = "";
+        public string ServiceName { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public bool IsServed { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public bool IsServed { get; set; } = false;
+    }
 }
 

@@ -1,75 +1,976 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<title>نظام حجز الدور</title>
-<style>
-body {
-    font-family: Arial;
-    text-align: center;
-    background: #f5f5f5;
-    padding: 40px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartQueue</title>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#121b2f;
+      --muted:#9fb0d0;
+      --text:#eaf0ff;
+      --primary:#3b82f6;
+      --primary2:#2563eb;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 18px 60px rgba(0,0,0,.42);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial;
+      background: radial-gradient(1200px 700px at 70% -10%, rgba(59,130,246,.35), transparent),
+                  radial-gradient(900px 500px at 0% 10%, rgba(34,197,94,.15), transparent),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .app{
+      width:min(1050px, 100%);
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+    }
+
+    .panel{
+      background: rgba(18,27,47,.86);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:30px;
+      letter-spacing:.2px;
+    }
+
+    .tag{
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.05);
+    }
+
+    .sub{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:14px;
+    }
+
+    .services{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+
+    button.service{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(59,130,246,.18), rgba(59,130,246,.06));
+      color:var(--text);
+      padding:16px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      text-align:right;
+      transition:.15s ease;
+      position:relative;
+      overflow:hidden;
+      outline: none;
+    }
+    button.service:hover{ transform: translateY(-2px); border-color: rgba(59,130,246,.45); }
+    button.service:active{ transform: translateY(0px); }
+    button.service:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .service .title{ font-size:18px; font-weight:800; margin-bottom:4px; }
+    .service .hint{ font-size:12px; color:var(--muted); }
+
+    .rightTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+
+    .ticketCard{ display:grid; gap:12px; }
+
+    .bigNumber{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius: 18px;
+      padding:18px;
+      text-align:center;
+      position:relative;
+    }
+    .bigNumber .label{ color:var(--muted); font-size:13px; }
+    .bigNumber .num{
+      font-size:64px;
+      font-weight:900;
+      margin:10px 0;
+      letter-spacing:1px;
+      transition: .18s ease;
+    }
+    .bigNumber .meta{ color:var(--muted); font-size:13px; }
+
+    .pulse{
+      animation: pulse 1.1s ease-in-out infinite;
+      opacity:.9;
+    }
+    @keyframes pulse{
+      0%{ transform: scale(1); opacity:.75; }
+      50%{ transform: scale(1.02); opacity:1; }
+      100%{ transform: scale(1); opacity:.75; }
+    }
+
+    .status{
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius: 16px;
+      padding:14px;
+      color: var(--muted);
+      line-height:1.7;
+      min-height:90px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .status .icon{
+      width:22px;
+      height:22px;
+      border-radius:8px;
+      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+      margin-top:1px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    .mini{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      border-radius: 16px;
+      padding:14px;
+    }
+    .mini .k{ color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .mini .v{ font-size:18px; font-weight:800; display:flex; gap:8px; align-items:baseline; }
+    .mini .unit{ color:var(--muted); font-size:12px; font-weight:600; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:6px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      flex:1;
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding:12px 12px;
+      cursor:pointer;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      transition:.15s ease;
+      min-width: 140px;
+    }
+    .btn:hover{ border-color: rgba(255,255,255,.22); transform: translateY(-1px); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(37,99,235,.95), rgba(37,99,235,.70));
+      border-color: rgba(37,99,235,.65);
+    }
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(239,68,68,.90), rgba(239,68,68,.65));
+      border-color: rgba(239,68,68,.65);
+    }
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .toast{
+      position: fixed;
+      bottom: 18px;
+      left: 18px;
+      background: rgba(10,18,32,.86);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      transform: translateY(12px);
+      opacity: 0;
+      pointer-events:none;
+      transition:.18s ease;
+      font-size: 13px;
+      max-width: 340px;
+      line-height: 1.5;
+      z-index: 50;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Admin Modal */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 40;
+    }
+    .modalOverlay.show{ display:flex; }
+
+    .modal{
+      width: min(1100px, 100%);
+      background: rgba(18,27,47,.95);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      backdrop-filter: blur(12px);
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .modalTitle{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .modalTitle h2{
+      margin:0;
+      font-size:18px;
+    }
+    .filters{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin: 10px 0 12px;
+    }
+    .input, .select{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      outline: none;
+      min-width: 160px;
+    }
+    .input::placeholder{ color: rgba(159,176,208,.75); }
+
+    .tableWrap{
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,.04);
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead{
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      text-align: right;
+      vertical-align: middle;
+    }
+    tr:hover td{
+      background: rgba(255,255,255,.03);
+    }
+    .badge{
+      display:inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--muted);
+      font-size: 12px;
+      gap:8px;
+      align-items:center;
+    }
+    .badge.ok{ border-color: rgba(34,197,94,.45); color: #c7ffd8; }
+    .badge.warn{ border-color: rgba(245,158,11,.45); color: #ffe7bf; }
+    .tableActions{
+      display:flex;
+      gap:8px;
+      justify-content:flex-start;
+      flex-wrap: wrap;
+    }
+    .miniBtn{
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      transition:.15s ease;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .miniBtn:hover{ border-color: rgba(255,255,255,.22); transform: translateY(-1px); }
+    .miniBtn.primary{ background: linear-gradient(180deg, rgba(37,99,235,.95), rgba(37,99,235,.70)); border-color: rgba(37,99,235,.65); }
+    .miniBtn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+
+    .pager{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pagerBtns{
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 880px){
+      .app{ grid-template-columns: 1fr; }
+    }
+    /* اجعل نافذة الإدارة قابلة للتمرير */
+.modal{
+  max-height: calc(100vh - 80px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-h1 {
-    font-size: 40px;
+
+/* اجعل المحتوى الداخلي يتمدد ويُسمح له بالتمرير */
+.tableWrap{
+  max-height: calc(100vh - 320px); /* عدّل الرقم إذا احتجت */
+  overflow: auto;
 }
-button {
-    padding: 20px 40px;
-    font-size: 22px;
-    margin: 10px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
+
+/* تحسين تمرير على الموبايل */
+.tableWrap{
+  -webkit-overflow-scrolling: touch;
 }
-.service {
-    background: #2d89ef;
-    color: white;
+
+/* اجعل الـ overlay لا يمنع التمرير داخل modal */
+.modalOverlay{
+  overflow: hidden;
 }
-.card {
-    margin-top: 30px;
-    padding: 30px;
-    background: white;
-    border-radius: 20px;
-    display: inline-block;
-}
-.ticket-number {
-    font-size: 70px;
-    font-weight: bold;
-    margin: 10px 0;
-}
-</style>
+
+  </style>
 </head>
+
 <body>
+  <div class="app">
+    <!-- LEFT: اختيار الخدمة -->
+    <section class="panel">
+      <div class="brand">
+        <h1>SmartQueue</h1>
+        <span class="tag"><span class="dot" id="dotState"></span> نظام حجز الدور — نسخة تجريبية</span>
+      </div>
 
-<h1>نظام حجز الدور</h1>
-<p>اختر الخدمة</p>
+      <p class="sub">
+        اختر الخدمة التي تريدها. بعد الضغط سيتم إنشاء تذكرة ويظهر لك رقم الدور مباشرة.
+        تم تفعيل: عدد المنتظرين + الوقت المتوقع من السيرفر ✅
+      </p>
 
-<div>
-    <button class="service" onclick="takeTicket('إيداع')">إيداع</button>
-    <button class="service" onclick="takeTicket('سحب')">سحب</button>
-    <button class="service" onclick="takeTicket('فتح حساب')">فتح حساب</button>
-    <button class="service" onclick="takeTicket('استفسار')">استفسار</button>
+      <div class="services" id="servicesBox">
+        <button class="service" onclick="takeTicket('إيداع')">
+          <div class="title">إيداع</div>
+          <div class="hint">إنشاء تذكرة للإيداع</div>
+        </button>
+        <button class="service" onclick="takeTicket('سحب')">
+          <div class="title">سحب</div>
+          <div class="hint">إنشاء تذكرة للسحب</div>
+        </button>
+        <button class="service" onclick="takeTicket('فتح حساب')">
+          <div class="title">فتح حساب</div>
+          <div class="hint">إنشاء تذكرة لفتح حساب</div>
+        </button>
+        <button class="service" onclick="takeTicket('استفسار')">
+          <div class="title">استفسار</div>
+          <div class="hint">إنشاء تذكرة للاستفسار</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT: عرض رقم الدور + الحالة -->
+    <aside class="panel">
+      <div class="rightTop">
+        <div>
+          <div class="tag">لوحة العميل</div>
+        </div>
+        <div class="tag" id="apiState">API: غير متأكد</div>
+      </div>
+
+      <div class="ticketCard">
+        <div class="bigNumber">
+          <div class="label">رقم دورك</div>
+          <div class="num" id="displayNumber">—</div>
+          <div class="meta" id="serviceLabel">اختر خدمة أولاً</div>
+        </div>
+
+        <div class="row">
+          <div class="mini">
+            <div class="k">الوقت المتوقع</div>
+            <div class="v">
+              <span id="etaMinutes">—</span>
+              <span class="unit" id="etaUnit"></span>
+            </div>
+          </div>
+
+          <div class="mini">
+            <div class="k">عدد المنتظرين</div>
+            <div class="v"><span id="waitingCount">—</span></div>
+          </div>
+        </div>
+
+        <div class="status" id="statusBox">
+          <div class="icon">ℹ️</div>
+          <div id="statusText">جاهز ✅ اختر خدمة لإنشاء تذكرتك.</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" onclick="checkApi()">فحص الاتصال</button>
+          <button class="btn" onclick="copyTicket()">نسخ رقم الدور</button>
+          <button class="btn" onclick="openSwagger()">فتح Swagger</button>
+          <button class="btn primary" onclick="openAdmin()">لوحة الإدارة</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="modalOverlay" id="adminOverlay" onclick="closeAdminOnBackdrop(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modalHeader">
+        <div class="modalTitle">
+          <span class="tag">Admin Panel</span>
+          <h2>إدارة التذاكر</h2>
+        </div>
+
+        <div class="pagerBtns">
+          <button class="miniBtn" onclick="refreshAdmin()">تحديث</button>
+          <button class="miniBtn danger" style="border-color: rgba(239,68,68,.65);" onclick="closeAdmin()">إغلاق</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input class="input" id="adminServiceName" placeholder="فلترة الخدمة (مثال: سحب)" />
+        <select class="select" id="adminIsServed">
+          <option value="">الكل</option>
+          <option value="false">غير مخدوم</option>
+          <option value="true">مخدوم</option>
+        </select>
+
+        <select class="select" id="adminPageSize">
+          <option value="5">5 / صفحة</option>
+          <option value="10" selected>10 / صفحة</option>
+          <option value="20">20 / صفحة</option>
+          <option value="50">50 / صفحة</option>
+        </select>
+
+        <button class="miniBtn primary" onclick="applyAdminFilters()">تطبيق</button>
+        <button class="miniBtn" onclick="resetAdminFilters()">إعادة ضبط</button>
+      </div>
+<div class="row" style="margin: 10px 0;">
+  <div class="mini">
+    <div class="k">إجمالي التذاكر</div>
+    <div class="v"><span id="stTotal">—</span></div>
+  </div>
+
+  <div class="mini">
+    <div class="k">غير مخدوم</div>
+    <div class="v"><span id="stWaiting">—</span></div>
+  </div>
+
+  <div class="mini">
+    <div class="k">مخدوم</div>
+    <div class="v"><span id="stServed">—</span></div>
+  </div>
 </div>
 
-<div id="result"></div>
+<div class="actions" style="margin: 0 0 8px;">
+  <button class="btn" id="autoBtn" onclick="toggleAutoRefresh()">تشغيل التحديث التلقائي</button>
+  <span class="tag" id="autoState">Auto: OFF</span>
+</div>
 
-<script>
-async function takeTicket(serviceName) {
-    const res = await fetch(`/api/Tickets?serviceName=${encodeURIComponent(serviceName)}`, {
-        method: 'POST'
-    });
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">ID</th>
+              <th>الخدمة</th>
+              <th style="width:190px;">وقت الإنشاء</th>
+              <th style="width:140px;">الحالة</th>
+              <th style="width:180px;">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="adminTicketsBody">
+            <tr><td colspan="5" style="color: var(--muted);">—</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    const data = await res.json();
-
-    document.getElementById('result').innerHTML = `
-        <div class="card">
-            <div>رقم دورك</div>
-            <div class="ticket-number">${data.displayNumber ?? data.id}</div>
-            <div>الخدمة: ${data.serviceName}</div>
+      <div class="pager">
+        <div id="adminPagerInfo">—</div>
+        <div class="pagerBtns">
+          <button class="miniBtn" id="adminPrevBtn" onclick="adminPrev()">Prev</button>
+          <button class="miniBtn" id="adminNextBtn" onclick="adminNext()">Next</button>
         </div>
-    `;
-}
-</script>
+      </div>
+    </div>
+  </div>
 
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = "http://localhost:5295"; // إذا تغيّر البورت عدله هنا
+
+    function toast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=> t.classList.remove("show"), 2200);
+    }
+
+    function setStatus(msg, type="info"){
+      const box = document.getElementById("statusBox");
+      const text = document.getElementById("statusText");
+
+      let icon = "ℹ️";
+      let color = "#9fb0d0";
+
+      if(type === "ok"){ icon = "✅"; color = "#c7ffd8"; }
+      if(type === "err"){ icon = "⛔"; color = "#ffd1d1"; }
+      if(type === "warn"){ icon = "⚠️"; color = "#ffe7bf"; }
+
+      box.style.color = color;
+      text.textContent = msg;
+      box.querySelector(".icon").textContent = icon;
+    }
+
+    function setApiState(ok){
+      const el = document.getElementById("apiState");
+      const dot = document.getElementById("dotState");
+
+      el.textContent = ok ? "API: متصل ✅" : "API: غير متصل ❌";
+      el.style.borderColor = ok ? "rgba(34,197,94,.55)" : "rgba(239,68,68,.55)";
+      el.style.color = ok ? "#c7ffd8" : "#ffd1d1";
+
+      dot.style.background = ok ? "rgba(34,197,94,.9)" : "rgba(239,68,68,.9)";
+      dot.style.boxShadow = ok ? "0 0 0 4px rgba(34,197,94,.10)" : "0 0 0 4px rgba(239,68,68,.10)";
+    }
+
+    function setButtonsDisabled(disabled){
+      document.querySelectorAll("#servicesBox .service").forEach(b => b.disabled = disabled);
+    }
+
+    async function checkApi(){
+      try{
+        const res = await fetch(`${API_BASE}/swagger/v1/swagger.json`);
+        setApiState(res.ok);
+        setStatus(res.ok ? "الاتصال بالسيرفر ناجح ✅" : "السيرفر رد لكن يوجد مشكلة ❗", res.ok ? "ok" : "warn");
+      }catch(e){
+        setApiState(false);
+        setStatus("لا يوجد اتصال بالسيرفر. تأكد أن dotnet run شغال وأن البورت صحيح.", "err");
+      }
+    }
+
+    function openSwagger(){
+      window.open(`${API_BASE}/swagger`, "_blank");
+    }
+
+    function copyTicket(){
+      const num = document.getElementById("displayNumber").textContent.trim();
+      if(!num || num === "—" || num === "…"){
+        toast("لا يوجد رقم لنسخه الآن.");
+        return;
+      }
+      navigator.clipboard.writeText(num)
+        .then(()=> toast("تم نسخ رقم الدور ✅"))
+        .catch(()=> toast("تعذر النسخ. انسخه يدويًا."));
+    }
+
+    async function takeTicket(serviceName) {
+      setStatus("جارٍ إنشاء التذكرة...", "info");
+      document.getElementById("serviceLabel").textContent = `الخدمة: ${serviceName}`;
+
+      const numEl = document.getElementById("displayNumber");
+      const waitingEl = document.getElementById("waitingCount");
+      const etaEl = document.getElementById("etaMinutes");
+      const etaUnitEl = document.getElementById("etaUnit");
+
+      numEl.textContent = "…";
+      numEl.classList.add("pulse");
+      waitingEl.textContent = "—";
+      etaEl.textContent = "—";
+      etaUnitEl.textContent = "";
+
+      setButtonsDisabled(true);
+
+      try {
+        const url = `${API_BASE}/api/Tickets?serviceName=${encodeURIComponent(serviceName)}`;
+        const res = await fetch(url, { method: "POST" });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          setStatus("حدث خطأ أثناء إنشاء التذكرة: " + txt, "err");
+          setApiState(false);
+          return;
+        }
+
+        const data = await res.json();
+
+        numEl.textContent = (data.id ?? "—");
+
+        const waiting = (typeof data.waiting === "number") ? data.waiting : null;
+        waitingEl.textContent = (waiting !== null) ? waiting : "—";
+
+        if (typeof data.estimatedMinutes === "number") {
+          etaEl.textContent = data.estimatedMinutes;
+          etaUnitEl.textContent = "دقيقة";
+        } else {
+          const mpp = (typeof data.minutesPerPerson === "number") ? data.minutesPerPerson : null;
+          if (waiting !== null && mpp !== null) {
+            etaEl.textContent = Math.max(0, Math.round(waiting * mpp));
+            etaUnitEl.textContent = "دقيقة";
+          } else {
+            etaEl.textContent = "—";
+            etaUnitEl.textContent = "";
+          }
+        }
+
+        setStatus("تم إنشاء تذكرتك بنجاح ✅ احتفظ برقم الدور.", "ok");
+        setApiState(true);
+        toast("تم إنشاء التذكرة ✅");
+
+        // لو لوحة الإدارة مفتوحة، حدّثها
+        if (document.getElementById("adminOverlay").classList.contains("show")) {
+          refreshAdmin();
+        }
+
+      } catch (e) {
+        setApiState(false);
+        setStatus("فشل الاتصال بالسيرفر. تأكد من API_BASE والبورت.", "err");
+      } finally {
+        numEl.classList.remove("pulse");
+        setButtonsDisabled(false);
+      }
+    }
+
+    /* =========================
+       Admin Panel (Pagination)
+       ========================= */
+
+    let adminPage = 1;
+    let adminPageSize = 10;
+    let adminServiceName = "";
+    let adminIsServed = ""; // "" => all, "false", "true"
+
+    function openAdmin(){
+      document.getElementById("adminOverlay").classList.add("show");
+      // sync UI inputs
+      document.getElementById("adminServiceName").value = adminServiceName;
+      document.getElementById("adminIsServed").value = adminIsServed;
+      document.getElementById("adminPageSize").value = String(adminPageSize);
+      loadAdminTickets();
+      loadAdminStats();
+
+    }
+
+    function closeAdmin(){
+  document.getElementById("adminOverlay").classList.remove("show");
+  if (autoTimer){
+    clearInterval(autoTimer);
+    autoTimer = null;
+    document.getElementById("autoState").textContent = "Auto: OFF";
+    document.getElementById("autoBtn").textContent = "تشغيل التحديث التلقائي";
+  }
+}
+
+
+    function closeAdminOnBackdrop(e){
+      // click outside modal closes
+      closeAdmin();
+    }
+
+    function resetAdminFilters(){
+      adminPage = 1;
+      adminPageSize = 10;
+      adminServiceName = "";
+      adminIsServed = "";
+
+      document.getElementById("adminServiceName").value = "";
+      document.getElementById("adminIsServed").value = "";
+      document.getElementById("adminPageSize").value = "10";
+
+      loadAdminTickets();
+    }
+
+    function applyAdminFilters(){
+  adminPage = 1;
+  adminServiceName = document.getElementById("adminServiceName").value.trim();
+  adminIsServed = document.getElementById("adminIsServed").value; // "", "true", "false"
+  adminPageSize = parseInt(document.getElementById("adminPageSize").value, 10) || 10;
+  loadAdminTickets();
+}
+
+
+    function refreshAdmin(){
+  loadAdminTickets();
+  loadAdminStats();
+}
+
+
+    function adminPrev(){
+      if (adminPage > 1){
+        adminPage--;
+        loadAdminTickets();
+      }
+    }
+
+    function adminNext(){
+      adminPage++;
+      loadAdminTickets();
+    }
+
+    async function loadAdminTickets(){
+  const body = document.getElementById("adminTicketsBody");
+  body.innerHTML = `<tr><td colspan="5" style="color: var(--muted);">جارٍ التحميل...</td></tr>`;
+
+  const params = new URLSearchParams();
+  params.set("page", String(adminPage));
+  params.set("pageSize", String(adminPageSize));
+
+  // ✅ serviceName عربي: لازم نضمن ترميز صحيح
+  if (adminServiceName && adminServiceName.trim() !== "") {
+    params.set("serviceName", adminServiceName.trim());
+  }
+
+  // ✅ isServed: نرسل true/false بشكل واضح
+  if (adminIsServed === "true") params.set("isServed", "true");
+  if (adminIsServed === "false") params.set("isServed", "false");
+
+  const url = `${API_BASE}/api/Tickets?${params.toString()}`;
+  console.log("ADMIN URL =>", url);
+
+  try{
+    const res = await fetch(url);
+
+    // لو API رجع خطأ
+    if(!res.ok){
+      const txt = await res.text();
+      body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">HTTP ${res.status}: ${escapeHtml(txt)}</td></tr>`;
+      return;
+    }
+
+    const result = await res.json();
+
+    // ✅ تحقق أن النتيجة بالشكل الجديد (pagination)
+    if (!result || !Array.isArray(result.data)) {
+      body.innerHTML = `<tr><td colspan="5" style="color:#ffe7bf;">النتيجة غير متوقعة من السيرفر (تأكد أن Controller يرجع data/page/totalPages).<br/>URL: ${escapeHtml(url)}</td></tr>`;
+      console.log("Unexpected result:", result);
+      return;
+    }
+
+    renderAdminTickets(result.data);
+    updateAdminPager(result);
+
+  }catch(e){
+    body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">فشل الاتصال بالسيرفر. تأكد من dotnet run والبورت.<br/>${escapeHtml(String(e))}</td></tr>`;
+    console.error(e);
+  }
+}
+
+
+    function updateAdminPager(result){
+      const info = document.getElementById("adminPagerInfo");
+      const prevBtn = document.getElementById("adminPrevBtn");
+      const nextBtn = document.getElementById("adminNextBtn");
+
+      const totalPages = result.totalPages ?? 1;
+      const page = result.page ?? adminPage;
+      const totalCount = result.totalCount ?? 0;
+
+      adminPage = page; // sync
+
+      info.textContent = `صفحة ${page} / ${totalPages} — إجمالي: ${totalCount}`;
+
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = page >= totalPages || totalPages === 0;
+    }
+
+    function renderAdminTickets(tickets){
+      const body = document.getElementById("adminTicketsBody");
+
+      if(!tickets.length){
+        body.innerHTML = `<tr><td colspan="5" style="color: var(--muted);">لا توجد نتائج.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = "";
+      for(const t of tickets){
+        const isServed = !!t.isServed;
+
+        const badge = isServed
+          ? `<span class="badge ok">✅ مخدوم</span>`
+          : `<span class="badge warn">⏳ غير مخدوم</span>`;
+
+        const created = t.createdAt ? new Date(t.createdAt).toLocaleString("ar") : "—";
+
+        const serveBtn = isServed
+          ? `<button class="miniBtn" disabled>Served</button>`
+          : `<button class="miniBtn primary" onclick="serveFromAdmin(${t.id})">Serve</button>`;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>#${t.id}</td>
+          <td>${escapeHtml(t.serviceName ?? "—")}</td>
+          <td>${escapeHtml(created)}</td>
+          <td>${badge}</td>
+          <td>
+            <div class="tableActions">
+              ${serveBtn}
+            </div>
+          </td>
+        `;
+        body.appendChild(row);
+      }
+    }
+
+    async function serveFromAdmin(id){
+      try{
+        const res = await fetch(`${API_BASE}/api/Tickets/${id}/serve`, { method: "POST" });
+        if(!res.ok){
+          toast("تعذر Serve للتذكرة #" + id);
+          return;
+        }
+        toast("تم Serve للتذكرة #" + id + " ✅");
+        refreshAdmin();
+      }catch(e){
+        toast("فشل الاتصال بالسيرفر.");
+      }
+    }
+
+    // حماية بسيطة للـ HTML
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // فحص الاتصال عند فتح الصفحة
+    checkApi();
+    let autoTimer = null;
+
+function toggleAutoRefresh(){
+  const state = document.getElementById("autoState");
+  const btn = document.getElementById("autoBtn");
+
+  if (autoTimer){
+    clearInterval(autoTimer);
+    autoTimer = null;
+    state.textContent = "Auto: OFF";
+    btn.textContent = "تشغيل التحديث التلقائي";
+    toast("تم إيقاف التحديث التلقائي");
+    return;
+  }
+
+  autoTimer = setInterval(() => {
+    if (document.getElementById("adminOverlay").classList.contains("show")){
+      refreshAdmin();
+    }
+  }, 5000);
+
+  state.textContent = "Auto: ON (5s)";
+  btn.textContent = "إيقاف التحديث التلقائي";
+  toast("تم تشغيل التحديث التلقائي كل 5 ثواني");
+}
+
+async function loadAdminStats(){
+  // إجمالي
+  const totalRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1`);
+  const total = totalRes.ok ? (await totalRes.json()).totalCount : null;
+
+  // غير مخدوم
+  const waitingRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=false`);
+  const waiting = waitingRes.ok ? (await waitingRes.json()).totalCount : null;
+
+  // مخدوم
+  const servedRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=true`);
+  const served = servedRes.ok ? (await servedRes.json()).totalCount : null;
+
+  document.getElementById("stTotal").textContent = (total ?? "—");
+  document.getElementById("stWaiting").textContent = (waiting ?? "—");
+  document.getElementById("stServed").textContent = (served ?? "—");
+}
+
+  </script>
 </body>
 </html>
+
+
+
+
