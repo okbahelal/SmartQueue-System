@@ -254,10 +254,7 @@
       line-height: 1.5;
       z-index: 50;
     }
-    .toast.show{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .toast.show{ opacity: 1; transform: translateY(0); }
 
     /* Admin Modal */
     .modalOverlay{
@@ -269,6 +266,7 @@
       justify-content: center;
       padding: 18px;
       z-index: 40;
+      overflow: hidden;
     }
     .modalOverlay.show{ display:flex; }
 
@@ -280,6 +278,11 @@
       box-shadow: var(--shadow);
       padding: 16px;
       backdrop-filter: blur(12px);
+
+      max-height: calc(100vh - 80px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     .modalHeader{
       display:flex;
@@ -318,8 +321,10 @@
     .tableWrap{
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 14px;
-      overflow: hidden;
+      overflow: auto;
       background: rgba(255,255,255,.04);
+      max-height: calc(100vh - 320px);
+      -webkit-overflow-scrolling: touch;
     }
     table{
       width:100%;
@@ -351,6 +356,7 @@
     }
     .badge.ok{ border-color: rgba(34,197,94,.45); color: #c7ffd8; }
     .badge.warn{ border-color: rgba(245,158,11,.45); color: #ffe7bf; }
+
     .tableActions{
       display:flex;
       gap:8px;
@@ -369,7 +375,10 @@
       white-space: nowrap;
     }
     .miniBtn:hover{ border-color: rgba(255,255,255,.22); transform: translateY(-1px); }
-    .miniBtn.primary{ background: linear-gradient(180deg, rgba(37,99,235,.95), rgba(37,99,235,.70)); border-color: rgba(37,99,235,.65); }
+    .miniBtn.primary{
+      background: linear-gradient(180deg, rgba(37,99,235,.95), rgba(37,99,235,.70));
+      border-color: rgba(37,99,235,.65);
+    }
     .miniBtn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
     .pager{
@@ -391,30 +400,6 @@
     @media (max-width: 880px){
       .app{ grid-template-columns: 1fr; }
     }
-    /* اجعل نافذة الإدارة قابلة للتمرير */
-.modal{
-  max-height: calc(100vh - 80px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* اجعل المحتوى الداخلي يتمدد ويُسمح له بالتمرير */
-.tableWrap{
-  max-height: calc(100vh - 320px); /* عدّل الرقم إذا احتجت */
-  overflow: auto;
-}
-
-/* تحسين تمرير على الموبايل */
-.tableWrap{
-  -webkit-overflow-scrolling: touch;
-}
-
-/* اجعل الـ overlay لا يمنع التمرير داخل modal */
-.modalOverlay{
-  overflow: hidden;
-}
-
   </style>
 </head>
 
@@ -455,9 +440,7 @@
     <!-- RIGHT: عرض رقم الدور + الحالة -->
     <aside class="panel">
       <div class="rightTop">
-        <div>
-          <div class="tag">لوحة العميل</div>
-        </div>
+        <div><div class="tag">لوحة العميل</div></div>
         <div class="tag" id="apiState">API: غير متأكد</div>
       </div>
 
@@ -531,27 +514,28 @@
         <button class="miniBtn primary" onclick="applyAdminFilters()">تطبيق</button>
         <button class="miniBtn" onclick="resetAdminFilters()">إعادة ضبط</button>
       </div>
-<div class="row" style="margin: 10px 0;">
-  <div class="mini">
-    <div class="k">إجمالي التذاكر</div>
-    <div class="v"><span id="stTotal">—</span></div>
-  </div>
 
-  <div class="mini">
-    <div class="k">غير مخدوم</div>
-    <div class="v"><span id="stWaiting">—</span></div>
-  </div>
+      <div class="row" style="margin: 10px 0;">
+        <div class="mini">
+          <div class="k">إجمالي التذاكر</div>
+          <div class="v"><span id="stTotal">—</span></div>
+        </div>
 
-  <div class="mini">
-    <div class="k">مخدوم</div>
-    <div class="v"><span id="stServed">—</span></div>
-  </div>
-</div>
+        <div class="mini">
+          <div class="k">غير مخدوم</div>
+          <div class="v"><span id="stWaiting">—</span></div>
+        </div>
 
-<div class="actions" style="margin: 0 0 8px;">
-  <button class="btn" id="autoBtn" onclick="toggleAutoRefresh()">تشغيل التحديث التلقائي</button>
-  <span class="tag" id="autoState">Auto: OFF</span>
-</div>
+        <div class="mini">
+          <div class="k">مخدوم</div>
+          <div class="v"><span id="stServed">—</span></div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin: 0 0 8px;">
+        <button class="btn" id="autoBtn" onclick="toggleAutoRefresh()">تشغيل التحديث التلقائي</button>
+        <span class="tag" id="autoState">Auto: OFF</span>
+      </div>
 
       <div class="tableWrap">
         <table>
@@ -703,7 +687,6 @@
         setApiState(true);
         toast("تم إنشاء التذكرة ✅");
 
-        // لو لوحة الإدارة مفتوحة، حدّثها
         if (document.getElementById("adminOverlay").classList.contains("show")) {
           refreshAdmin();
         }
@@ -725,31 +708,28 @@
     let adminPageSize = 10;
     let adminServiceName = "";
     let adminIsServed = ""; // "" => all, "false", "true"
+    let autoTimer = null;
 
     function openAdmin(){
       document.getElementById("adminOverlay").classList.add("show");
-      // sync UI inputs
       document.getElementById("adminServiceName").value = adminServiceName;
       document.getElementById("adminIsServed").value = adminIsServed;
       document.getElementById("adminPageSize").value = String(adminPageSize);
       loadAdminTickets();
       loadAdminStats();
-
     }
 
     function closeAdmin(){
-  document.getElementById("adminOverlay").classList.remove("show");
-  if (autoTimer){
-    clearInterval(autoTimer);
-    autoTimer = null;
-    document.getElementById("autoState").textContent = "Auto: OFF";
-    document.getElementById("autoBtn").textContent = "تشغيل التحديث التلقائي";
-  }
-}
-
+      document.getElementById("adminOverlay").classList.remove("show");
+      if (autoTimer){
+        clearInterval(autoTimer);
+        autoTimer = null;
+        document.getElementById("autoState").textContent = "Auto: OFF";
+        document.getElementById("autoBtn").textContent = "تشغيل التحديث التلقائي";
+      }
+    }
 
     function closeAdminOnBackdrop(e){
-      // click outside modal closes
       closeAdmin();
     }
 
@@ -764,22 +744,22 @@
       document.getElementById("adminPageSize").value = "10";
 
       loadAdminTickets();
+      loadAdminStats();
     }
 
     function applyAdminFilters(){
-  adminPage = 1;
-  adminServiceName = document.getElementById("adminServiceName").value.trim();
-  adminIsServed = document.getElementById("adminIsServed").value; // "", "true", "false"
-  adminPageSize = parseInt(document.getElementById("adminPageSize").value, 10) || 10;
-  loadAdminTickets();
-}
-
+      adminPage = 1;
+      adminServiceName = document.getElementById("adminServiceName").value.trim();
+      adminIsServed = document.getElementById("adminIsServed").value; // "", "true", "false"
+      adminPageSize = parseInt(document.getElementById("adminPageSize").value, 10) || 10;
+      loadAdminTickets();
+      loadAdminStats();
+    }
 
     function refreshAdmin(){
-  loadAdminTickets();
-  loadAdminStats();
-}
-
+      loadAdminTickets();
+      loadAdminStats();
+    }
 
     function adminPrev(){
       if (adminPage > 1){
@@ -794,53 +774,42 @@
     }
 
     async function loadAdminTickets(){
-  const body = document.getElementById("adminTicketsBody");
-  body.innerHTML = `<tr><td colspan="5" style="color: var(--muted);">جارٍ التحميل...</td></tr>`;
+      const body = document.getElementById("adminTicketsBody");
+      body.innerHTML = `<tr><td colspan="5" style="color: var(--muted);">جارٍ التحميل...</td></tr>`;
 
-  const params = new URLSearchParams();
-  params.set("page", String(adminPage));
-  params.set("pageSize", String(adminPageSize));
+      const params = new URLSearchParams();
+      params.set("page", String(adminPage));
+      params.set("pageSize", String(adminPageSize));
 
-  // ✅ serviceName عربي: لازم نضمن ترميز صحيح
-  if (adminServiceName && adminServiceName.trim() !== "") {
-    params.set("serviceName", adminServiceName.trim());
-  }
+      if (adminServiceName) params.set("serviceName", adminServiceName);
+      if (adminIsServed === "true") params.set("isServed", "true");
+      if (adminIsServed === "false") params.set("isServed", "false");
 
-  // ✅ isServed: نرسل true/false بشكل واضح
-  if (adminIsServed === "true") params.set("isServed", "true");
-  if (adminIsServed === "false") params.set("isServed", "false");
+      const url = `${API_BASE}/api/Tickets?${params.toString()}`;
 
-  const url = `${API_BASE}/api/Tickets?${params.toString()}`;
-  console.log("ADMIN URL =>", url);
+      try{
+        const res = await fetch(url);
 
-  try{
-    const res = await fetch(url);
+        if(!res.ok){
+          const txt = await res.text();
+          body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">HTTP ${res.status}: ${escapeHtml(txt)}</td></tr>`;
+          return;
+        }
 
-    // لو API رجع خطأ
-    if(!res.ok){
-      const txt = await res.text();
-      body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">HTTP ${res.status}: ${escapeHtml(txt)}</td></tr>`;
-      return;
+        const result = await res.json();
+
+        if (!result || !Array.isArray(result.data)) {
+          body.innerHTML = `<tr><td colspan="5" style="color:#ffe7bf;">النتيجة غير متوقعة من السيرفر (تأكد أن Controller يرجع data/page/totalPages).<br/>URL: ${escapeHtml(url)}</td></tr>`;
+          return;
+        }
+
+        renderAdminTickets(result.data);
+        updateAdminPager(result);
+
+      }catch(e){
+        body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">فشل الاتصال بالسيرفر.<br/>${escapeHtml(String(e))}</td></tr>`;
+      }
     }
-
-    const result = await res.json();
-
-    // ✅ تحقق أن النتيجة بالشكل الجديد (pagination)
-    if (!result || !Array.isArray(result.data)) {
-      body.innerHTML = `<tr><td colspan="5" style="color:#ffe7bf;">النتيجة غير متوقعة من السيرفر (تأكد أن Controller يرجع data/page/totalPages).<br/>URL: ${escapeHtml(url)}</td></tr>`;
-      console.log("Unexpected result:", result);
-      return;
-    }
-
-    renderAdminTickets(result.data);
-    updateAdminPager(result);
-
-  }catch(e){
-    body.innerHTML = `<tr><td colspan="5" style="color:#ffd1d1;">فشل الاتصال بالسيرفر. تأكد من dotnet run والبورت.<br/>${escapeHtml(String(e))}</td></tr>`;
-    console.error(e);
-  }
-}
-
 
     function updateAdminPager(result){
       const info = document.getElementById("adminPagerInfo");
@@ -851,7 +820,7 @@
       const page = result.page ?? adminPage;
       const totalCount = result.totalCount ?? 0;
 
-      adminPage = page; // sync
+      adminPage = page;
 
       info.textContent = `صفحة ${page} / ${totalPages} — إجمالي: ${totalCount}`;
 
@@ -887,11 +856,7 @@
           <td>${escapeHtml(t.serviceName ?? "—")}</td>
           <td>${escapeHtml(created)}</td>
           <td>${badge}</td>
-          <td>
-            <div class="tableActions">
-              ${serveBtn}
-            </div>
-          </td>
+          <td><div class="tableActions">${serveBtn}</div></td>
         `;
         body.appendChild(row);
       }
@@ -911,7 +876,6 @@
       }
     }
 
-    // حماية بسيطة للـ HTML
     function escapeHtml(str){
       return String(str)
         .replaceAll("&", "&amp;")
@@ -921,56 +885,53 @@
         .replaceAll("'", "&#039;");
     }
 
+    function toggleAutoRefresh(){
+      const state = document.getElementById("autoState");
+      const btn = document.getElementById("autoBtn");
+
+      if (autoTimer){
+        clearInterval(autoTimer);
+        autoTimer = null;
+        state.textContent = "Auto: OFF";
+        btn.textContent = "تشغيل التحديث التلقائي";
+        toast("تم إيقاف التحديث التلقائي");
+        return;
+      }
+
+      autoTimer = setInterval(() => {
+        if (document.getElementById("adminOverlay").classList.contains("show")){
+          refreshAdmin();
+        }
+      }, 5000);
+
+      state.textContent = "Auto: ON (5s)";
+      btn.textContent = "إيقاف التحديث التلقائي";
+      toast("تم تشغيل التحديث التلقائي كل 5 ثواني");
+    }
+
+    async function loadAdminStats(){
+      try{
+        const totalRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1`);
+        const total = totalRes.ok ? (await totalRes.json()).totalCount : null;
+
+        const waitingRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=false`);
+        const waiting = waitingRes.ok ? (await waitingRes.json()).totalCount : null;
+
+        const servedRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=true`);
+        const served = servedRes.ok ? (await servedRes.json()).totalCount : null;
+
+        document.getElementById("stTotal").textContent = (total ?? "—");
+        document.getElementById("stWaiting").textContent = (waiting ?? "—");
+        document.getElementById("stServed").textContent = (served ?? "—");
+      }catch(e){
+        document.getElementById("stTotal").textContent = "—";
+        document.getElementById("stWaiting").textContent = "—";
+        document.getElementById("stServed").textContent = "—";
+      }
+    }
+
     // فحص الاتصال عند فتح الصفحة
     checkApi();
-    let autoTimer = null;
-
-function toggleAutoRefresh(){
-  const state = document.getElementById("autoState");
-  const btn = document.getElementById("autoBtn");
-
-  if (autoTimer){
-    clearInterval(autoTimer);
-    autoTimer = null;
-    state.textContent = "Auto: OFF";
-    btn.textContent = "تشغيل التحديث التلقائي";
-    toast("تم إيقاف التحديث التلقائي");
-    return;
-  }
-
-  autoTimer = setInterval(() => {
-    if (document.getElementById("adminOverlay").classList.contains("show")){
-      refreshAdmin();
-    }
-  }, 5000);
-
-  state.textContent = "Auto: ON (5s)";
-  btn.textContent = "إيقاف التحديث التلقائي";
-  toast("تم تشغيل التحديث التلقائي كل 5 ثواني");
-}
-
-async function loadAdminStats(){
-  // إجمالي
-  const totalRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1`);
-  const total = totalRes.ok ? (await totalRes.json()).totalCount : null;
-
-  // غير مخدوم
-  const waitingRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=false`);
-  const waiting = waitingRes.ok ? (await waitingRes.json()).totalCount : null;
-
-  // مخدوم
-  const servedRes = await fetch(`${API_BASE}/api/Tickets?page=1&pageSize=1&isServed=true`);
-  const served = servedRes.ok ? (await servedRes.json()).totalCount : null;
-
-  document.getElementById("stTotal").textContent = (total ?? "—");
-  document.getElementById("stWaiting").textContent = (waiting ?? "—");
-  document.getElementById("stServed").textContent = (served ?? "—");
-}
-
   </script>
 </body>
 </html>
-
-
-
-

@@ -190,3 +190,4 @@ C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\SmartQueue.Api.genruntimeconfig.cache
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\ref\SmartQueue.Api.dll
 C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\compressed\pdv06anld0-{0}-0o8dwwdacp-0o8dwwdacp.gz
+C:\Users\adm\Desktop\SmartQueue\SmartQueue.Api\obj\Debug\net10.0\compressed\pdv06anld0-{0}-yx7gegx89u-yx7gegx89u.gz
